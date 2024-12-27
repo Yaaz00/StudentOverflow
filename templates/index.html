@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>StudentOverflow</title>
+</head>
+<body>
+    <header>
+        <h1>Bienvenido a StudentOverflow</h1>
+    </header>
+
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        
+        {% if session['user_id'] %}
+            <p>Hola, {{ session['nombre'] }}! <a href="{{ url_for('logout') }}">Cerrar sesión</a></p>
+        {% else %}
+            <p><a href="{{ url_for('login') }}">Iniciar sesión</a> o <a href="{{ url_for('signup') }}">Registrarse</a></p>
+        {% endif %}
+        
+        <h2>Hacer una Pregunta</h2>
+        
+        <form method="POST" action="{{ url_for('create_question') }}">
+            <input type="text" name="titulo" placeholder="Título de la pregunta" required>
+            <textarea name="contenido" placeholder="Contenido de la pregunta" required></textarea>
+            <input type="submit" value="Hacer Pregunta">
+        </form>
+
+        <h2>Preguntas</h2>
+        
+        {% for pregunta in preguntas %}
+            <div class="question">
+                <h3>{{ pregunta.titulo }}</h3>
+                <p>{{ pregunta.contenido }}</p>
+                <p><small>Pregunta hecha por: {{ pregunta.usuario.nombre }}</small></p>
+
+                <div class="reply">
+                    <h4>Respuestas:</h4>
+                    {% for respuesta in pregunta.respuestas %}
+                        <p>{{ respuesta.contenido }} - <small>Respuesta de: {{ respuesta.usuario.nombre }}</small></p>
+                    {% endfor %}
+                    
+                    <form method="POST" action="{{ url_for('add_response', pregunta_id=pregunta.id) }}">
+                        <textarea name="contenido" placeholder="Escribe tu respuesta aquí..." required></textarea>
+                        <input type="submit" value="Responder">
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
